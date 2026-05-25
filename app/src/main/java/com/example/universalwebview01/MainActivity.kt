@@ -1,0 +1,93 @@
+package com.example.universalwebview01
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+import com.example.universalwebview01.ui.theme.UniversalWebView01Theme
+
+class MainActivity : ComponentActivity() {
+
+    // UNIVERSAL CONTROL SWITCH
+    // Change this to whatever website or local asset you want to load!
+    private val TARGET_URL = "file:///android_asset/json-path-extractor.html"
+    // Example for a live website link:
+    // private val TARGET_URL = "https://www.google.com"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            UniversalWebView01Theme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    UniversalWebView(
+                        url = TARGET_URL,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@SuppressLint("SetJavaScriptEnabled")
+@Composable
+fun UniversalWebView(url: String, modifier: Modifier = Modifier) {
+    AndroidView(
+        modifier = modifier.fillMaxSize(),
+        factory = { context ->
+            WebView(context).apply {
+                // 1. Keeps link redirects and window loads strictly inside your app screen
+                webViewClient = WebViewClient()
+                webChromeClient = WebChromeClient()
+
+                // 2. Configure full engine browser properties
+                settings.apply {
+                    javaScriptEnabled = true      // Run complex JS scripts
+                    domStorageEnabled = true      // Allow cookies / theme memory
+                    databaseEnabled = true        // Run modern HTML5 DB storage operations
+
+                    // Layout scaling engines (forces 100vh elements to resize accurately)
+                    useWideViewPort = true
+                    loadWithOverviewMode = true
+
+                    // Unlocks native local app file directory environments
+                    allowFileAccess = true
+                    allowContentAccess = true
+
+                    @Suppress("DEPRECATION")
+                    allowUniversalAccessFromFileURLs = true
+                    @Suppress("DEPRECATION")
+                    allowFileAccessFromFileURLs = true
+
+                    // Allows rendering external fonts/scripts while browsing local HTML documents
+                    mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                }
+
+                // 3. Force Android system layout frames to obey physical display matches
+                layoutParams = android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                )
+
+                // 4. Pass the configured URL to the screen view engine
+                // For online html url use below.
+//                loadUrl("https://json-key-extractor-using-gs-v02-w.vercel.app/")
+
+                // For Local offline html file use below.
+                loadUrl("file:///android_asset/HTML_FILES/json-path-extractor.html")
+            }
+        }
+    )
+}
